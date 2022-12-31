@@ -1,0 +1,84 @@
+Copy code
+// Laravel
+// File: app/Models/Order.php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Order extends Model
+{
+// Kolom yang dapat diisi secara otomatis
+protected $fillable = [
+'status',
+// Kolom lain yang dibutuhkan
+];
+}
+Copy code
+// Laravel
+// File: app/Http/Controllers/OrderController.php
+
+namespace App\Http\Controllers;
+
+use App\Models\Order;
+use Illuminate\Http\Request;
+
+class OrderController extends Controller
+{
+public function confirm(Request $request)
+{
+// Ambil data pesanan dari database
+$order = Order::findOrFail($request->input('orderId'));
+
+// Ubah status pesanan menjadi "confirmed"
+$order->status = 'confirmed';
+$order->save();
+
+// Kirim respon sukses ke client
+return response()->json([
+'message' => 'Pesanan berhasil dikonfirmasi.'
+]);
+}
+}
+Copy code
+// ReactJS
+import React, { useState } from 'react';
+
+const OrderConfirmation = (props) => {
+const [isConfirmed, setIsConfirmed] = useState(false);
+
+const handleConfirmClick = () => {
+setIsConfirmed(true);
+
+// Kirim konfirmasi ke server menggunakan AJAX
+axios.post('/api/confirm-order', {
+orderId: props.orderId
+})
+.then(response => {
+// Tampilkan pesan sukses jika konfirmasi berhasil
+alert('Pesanan anda telah dikonfirmasi!');
+})
+.catch(error => {
+// Tampilkan pesan error jika terjadi kesalahan
+alert('Terjadi kesalahan saat mengkonfirmasi pesanan.');
+});
+}
+
+return (
+<div>
+    {
+    !isConfirmed &&
+    <button onClick={handleConfirmClick}>Konfirmasi Pesanan</button>
+    }
+    {
+    isConfirmed &&
+    <p>Pesanan anda telah dikonfirmasi.</p>
+    }
+</div>
+);
+};
+Routing:
+
+Copy code
+// Laravel
+Route::post('/api/confirm-order', 'OrderController@confirm');
